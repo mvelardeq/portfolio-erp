@@ -134,6 +134,12 @@ Route::group(['prefix' => 'ventas', 'namespace' => 'Ventas', 'middleware' => ['a
     Route::get('cotizacion', 'CotizacionController@index')->name('cotizacion');
     Route::get('cotizacion/crear', 'CotizacionController@crear')->name('crear_cotizacion');
     Route::post('cotizacion', 'CotizacionController@guardar')->name('guardar_cotizacion');
+
+    // --------------------------Automatiza pdf masivos--------------------------------------
+    Route::get('cotizacion/automatizar', 'CotizacionController@automatizar');
+    // --------------------------Automatiza pdf masivos--------------------------------------
+
+
     Route::get('cotizacion/{id}/editar', 'CotizacionController@editar')->name('editar_cotizacion');
     Route::put('cotizacion/{id}', 'CotizacionController@actualizar')->name('actualizar_cotizacion');
     Route::delete('cotizacion/{id}', 'CotizacionController@eliminar')->name('eliminar_cotizacion');

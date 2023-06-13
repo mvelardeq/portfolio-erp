@@ -92,3 +92,28 @@ if (!function_exists('canUser')) {
         }
     }
 }
+
+
+
+if (!function_exists('getPublicIdByUrl')) {
+    function getPublicIdByUrl($url)
+{
+    // Obtener la parte de la ruta de la URL después del dominio de Cloudinary
+    $ruta = parse_url($url, PHP_URL_PATH);
+
+    // Eliminar el prefijo "/v{timestamp}/" si está presente
+    $ruta = preg_replace('/\/v\d+/', '', $ruta);
+
+    // Eliminar las barras iniciales y finales de la ruta
+    $ruta = trim($ruta, '/');
+
+    // Obtener el public ID eliminando los segmentos iniciales de la ruta
+    $segmentos = explode('/', $ruta);
+    $publicId = implode('/', array_slice($segmentos, 3));
+
+    // Eliminar la extensión del archivo si está presente
+    $publicId = preg_replace('/\.\w+$/', '', $publicId);
+
+    return $publicId;
+}
+}

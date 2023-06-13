@@ -22,6 +22,7 @@ class CrearTablaCotizacion extends Migration
             $table->date('fecha',12);
             $table->string('dirigido_a',100);
             $table->string('pdf',200);
+            $table->string('observacion',900)->nullable();
             $table->timestamps();
             $table->charset = 'utf8mb4';
             $table->collation = 'utf8mb4_spanish_ci';

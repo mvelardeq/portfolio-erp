@@ -1,6 +1,6 @@
 {{-- {{dd(key($lineas_cotizacion))}}; --}}
 {{-- {{dd($descripciones)}}; --}}
-{{-- {{dd($subtotales)}}; --}}
+{{-- {{dd($lineas_cotizacion)}}; --}}
 <div class="form-group row">
     <label for="numero" class="col-lg-3 col-form-label">Número de cotización</label>
     <div class="col-lg-8">
@@ -44,6 +44,7 @@
     </div>
 </div>
 
+
 <div class="form-group row">
     <label for="observacion" class="col-lg-3 col-form-label">Observación</label>
     <div class="col-lg-8">
@@ -56,7 +57,6 @@
 <div class="row mb-3">
     <button type="submit" id="btn-agregar-item" class="btn btn-success">Agregar linea</button>
 </div>
-
 
 
 <table class= "table table-striped table-hover table-responsive-lg" id="table-form">
@@ -72,15 +72,33 @@
         </tr>
     </thead>
     <tbody id="compraBody">
-
+        @foreach ($lineas_cotizacion as $linea_cotizacion)
+            <tr>
+                <input type="hidden" name="descripcion[]" value="{{$linea_cotizacion->descripcion}}">
+                <input type="hidden" name="cantidad[]" value="{{$linea_cotizacion->cantidad}}">
+                <input type="hidden" name="subtotal[]" value="{{$linea_cotizacion->subtotal}}">
+                <td class="item">{{$loop->index+1}}</td>
+                <td>{{$linea_cotizacion->descripcion}}</td>
+                <td>{{$linea_cotizacion->cantidad}}</td>
+                <td>{{$linea_cotizacion->subtotal}}</td>
+                <td class="sum">{{$linea_cotizacion->cantidad*$linea_cotizacion->subtotal}}</td>
+                <td>
+                    <button class="eliminar-producto btn-accion-tabla eliminar tooltipsC"><i class="fa fa-fw fa-trash text-danger"></i></button>
+                    <button class="editar-producto btn-accion-tabla tooltips"><i class="fas fa-pencil-alt text-info"></i></button>
+                </td>
+            </tr>
+        @endforeach
     </tbody>
     <tfoot id="compraFoot">
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><strong>Total</strong></td>
+            <td>{{$total_coti}}</td>
+        </tr>
     </tfoot>
     <input id="total" type="hidden" name="total">
 </table>
-
-
-
-
 
 

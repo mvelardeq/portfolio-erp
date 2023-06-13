@@ -29,7 +29,8 @@ use Illuminate\Support\Str;
         position: relative;
         /* width: 21cm;
         height: 29.7cm; */
-        margin: 0 auto;
+        /* margin: 0 auto; */
+        margin: 460px 50px 80px;
         color: #001028;
         background: #FFFFFF;
         font-family: Arial, sans-serif;
@@ -37,15 +38,37 @@ use Illuminate\Support\Str;
         font-family: Arial;
         }
 
+        /* @page { margin: 400px 100px 60px; } */
+
         header {
         /* padding: 10px 0; */
         /* margin-bottom: 30px; */
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        /* height: 400px; */
         padding: 0;
         margin: 0;
         }
 
+        footer {
+        color: #5D6975;
+        width: 100%;
+        /* height: 30px; */
+        position: fixed;
+        bottom: 0;
+        left:0;
+        right: 0;
+        /* height: 60px; */
+        border-top: 1px solid #C1CED9;
+        padding: 20px 0;
+        text-align: center;
+        }
+
         main {
-            padding: 15px 40px;
+            padding: 0;
         }
 
         #logo {
@@ -71,7 +94,7 @@ use Illuminate\Support\Str;
         }
 
         #project {
-            padding: 0 40px;
+            padding: 0 50px;
         }
 
         #project strong {
@@ -147,23 +170,13 @@ use Illuminate\Support\Str;
         font-size: 1.2em;
         }
 
-        footer {
-        color: #5D6975;
-        width: 100%;
-        height: 30px;
-        position: absolute;
-        bottom: 0;
-        border-top: 1px solid #C1CED9;
-        padding: 8px 0;
-        text-align: center;
-        }
+
 	</style>
   </head>
   <body>
-    <header class="clearfix">
+    <header class="clearfix" id="header">
       <div id="logo">
-        {{-- <img src="{{public_path('assets/sb/assets/img/top-pdf.png')}}"> --}}
-        <img src="{{public_path('assets/sb/assets/img/top-pdf2.png')}}">
+        <img src="{{public_path('assets/sb/assets/img/top-pdf.png')}}">
       </div>
       <h1>COTIZACIÓN N° {{$cotizacion->numero}}</h1>
       <div id="project">
@@ -175,50 +188,55 @@ use Illuminate\Support\Str;
 
       </div>
     </header>
-    <main>
-      <table>
-        <thead>
-          <tr>
-            <th class="service">Item</th>
-            <th class="desc">Descripción</th>
-            <th>Cantidad</th>
-            <th>Valor Unit. S/.</th>
-            <th>Total S/.</th>
-          </tr>
-        </thead>
-        <tbody>
-            @foreach ($lineas_cotizacion as $linea_cotizacion)
-
+    <footer id="footer">
+        <div class="page">
+          Forma de pago: 100% a la aprobación de la cotización, 15 días de validez de la oferta.
+        </div>
+      </footer>
+    <main id="content">
+        <table>
+          <thead>
             <tr>
-                <td class="service">{{$loop->index+1}}</td>
-                <td class="desc">{{$linea_cotizacion->descripcion}}</td>
-                <td>{{number_format($linea_cotizacion->cantidad,2)}}</td>
-                <td>{{number_format($linea_cotizacion->subtotal,2)}}</td>
-                <td>{{number_format($linea_cotizacion->subtotal*$linea_cotizacion->cantidad,2)}}</td>
+              <th class="service">Item</th>
+              <th class="desc">Descripción</th>
+              <th>Cantidad</th>
+              <th>Valor Unit. S/.</th>
+              <th>Total S/.</th>
             </tr>
+          </thead>
+          <tbody>
+              @foreach ($lineas_cotizacion as $linea_cotizacion)
 
-            @endforeach
-          <tr>
-            <td colspan="4">SUBTOTAL</td>
-            <td class="total">S/.{{number_format($cotizacion_total->total,2)}}</td>
-          </tr>
-          <tr>
-            <td colspan="4">IGV 18%</td>
-            <td class="total">S/.{{number_format($cotizacion_total->total*0.18,2)}}</td>
-          </tr>
-          <tr>
-            <td colspan="4" class="grand total">PRECIO TOTAL</td>
-            <td class="grand total">S/.{{number_format($cotizacion_total->total*1.18,2)}}</td>
-          </tr>
-        </tbody>
-      </table>
-      <div id="notices">
-        <div>NOTA:</div>
-        <div class="notice">Son 15 días de validez de la oferta.</div>
-      </div>
+              <tr>
+                  <td class="service">{{$loop->index+1}}</td>
+                  <td class="desc">{{$linea_cotizacion->descripcion}}</td>
+                  <td>{{number_format($linea_cotizacion->cantidad,2)}}</td>
+                  <td>{{number_format($linea_cotizacion->subtotal,2)}}</td>
+                  <td>{{number_format($linea_cotizacion->subtotal*$linea_cotizacion->cantidad,2)}}</td>
+              </tr>
+
+              @endforeach
+            <tr>
+              <td colspan="4">SUBTOTAL</td>
+              <td class="total">S/.{{number_format($cotizacion_total->total,2)}}</td>
+            </tr>
+            <tr>
+              <td colspan="4">IGV 18%</td>
+              <td class="total">S/.{{number_format($cotizacion_total->total*0.18,2)}}</td>
+            </tr>
+            <tr>
+              <td colspan="4" class="grand total">PRECIO TOTAL</td>
+              <td class="grand total">S/.{{number_format($cotizacion_total->total*1.18,2)}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div id="notices">
+            @isset($cotizacion->observacion)
+                <div>NOTA:</div>
+                <div class="notice">{{$cotizacion->observacion}}</div>
+            @endisset
+        </div>
     </main>
-    <footer>
-      Forma de pago: 100% a la aprobación de la cotización.
-    </footer>
+
   </body>
 </html>

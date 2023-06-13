@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class CotizacionController extends Controller
 {
@@ -25,10 +24,6 @@ class CotizacionController extends Controller
         $cotizaciones= Cotizacion::with('lineas_cotizacion','equipo')->orderBy('fecha','desc')->orderBy('numero','desc')->get();
 
         return view('dinamica.ventas.cotizacion.index',compact('cotizaciones'));
-
-        // $pdf = App::make('dompdf.wrapper');
-        // $pdf->loadView('dinamica.ventas.cotizacion.pdf5',compact('cotizaciones'));
-        // return $pdf->stream();
 
     }
 
@@ -46,6 +41,50 @@ class CotizacionController extends Controller
         return  view('dinamica.ventas.cotizacion.crear',compact('cotizaciones', 'lineas_cotizacion', 'equipos'));
     }
 
+
+    // ----------------Automatiza-Crear pdfs masivos--------------------------
+
+    public function automatizar()
+    {
+
+        set_time_limit(900);
+
+        $cotizaciones= Cotizacion::with('lineas_cotizacion')->orderBy('id')->get();
+
+        foreach ($cotizaciones as $cotizacion) {
+
+            if($cotizacion->id<=890){
+                continue;
+            }
+
+            $lineas_cotizacion = Linea_cotizacion::where('cotizacion_id',$cotizacion->id)->orderBy('id')->get();
+            $cotizacion_total = Cotizacion::join('linea_cotizacion','cotizacion_id','=','cotizacion.id')->where('cotizacion_id',$cotizacion->id)->select(DB::raw('SUM(cantidad*subtotal) as total'))->first();
+            $cotizacion = Cotizacion::with('equipo')->findOrFail($cotizacion->id);
+
+            $pdf = App::make('dompdf.wrapper');
+            $content = $pdf->loadView('dinamica.ventas.cotizacion.pdf3', compact('cotizacion','lineas_cotizacion','cotizacion_total'))->output();
+
+            Storage::disk('local')->put('cotizacion.pdf',$pdf->output());
+            $ruta_pdf = storage_path('app/cotizacion.pdf');
+
+            $pdfUrl = Cotizacion::setQuotation($ruta_pdf);
+
+            Storage::disk('local')->delete('app/cotizacion.pdf');
+
+            Cotizacion::findOrFail($cotizacion->id)->update([
+                'pdf'=>$pdfUrl
+            ]);
+
+
+        }
+
+        return 'Good job!';
+
+    }
+
+    // ----------------Automatiza-Crear pdfs masivos--------------------------
+
+
     /**
      * Store a newly created resource in storage.
      *
@@ -55,71 +94,26 @@ class CotizacionController extends Controller
     public function guardar(Request $request)
     {
         can('crear-cotizaciones');
-        $equipo = Equipo::with('obra')->findOrFail($request->equipo_id);
         Cotizacion::create([
             'equipo_id' => $request->equipo_id,
             'numero' => $request->numero,
             'resumen' => $request->resumen,
             'fecha' => $request->fecha,
             'dirigido_a' => $request->dirigido_a,
-            'pdf' => Str::of('cotizacion_' . $request->numero . '_obra_' . $equipo->obra->nombre . '_' . $request->resumen)->slug('-'),
+            'observacion' => $request->observacion,
             ]);
 
             $idcotizacion= Cotizacion::orderBy('created_at', 'desc')->first()->id;
 
-            Linea_cotizacion::create([
-                'cotizacion_id' => $idcotizacion,
-                'descripcion' => $request->descripcion1,
-                'cantidad' => $request->cantidad1,
-                'subtotal' => $request->subtotal1,
-            ]);
 
-            if (isset($request->descripcion2)){
-
+            for ($i=0; $i < count($request->descripcion); $i++) {
                 Linea_cotizacion::create([
                     'cotizacion_id' => $idcotizacion,
-                    'descripcion' => $request->descripcion2,
-                    'cantidad' => $request->cantidad2,
-                    'subtotal' => $request->subtotal2,
+                    'descripcion' => $request->descripcion[$i],
+                    'cantidad' => $request->cantidad[$i],
+                    'subtotal' => $request->subtotal[$i],
                 ]);
             }
-            if (isset($request->descripcion3)){
-
-                Linea_cotizacion::create([
-                    'cotizacion_id' => $idcotizacion,
-                    'descripcion' => $request->descripcion3,
-                    'cantidad' => $request->cantidad3,
-                    'subtotal' => $request->subtotal3,
-                ]);
-            }
-            if (isset($request->descripcion4)){
-
-                Linea_cotizacion::create([
-                    'cotizacion_id' => $idcotizacion,
-                    'descripcion' => $request->descripcion4,
-                    'cantidad' => $request->cantidad4,
-                    'subtotal' => $request->subtotal4,
-                ]);
-            }
-            if (isset($request->descripcion5)){
-
-                Linea_cotizacion::create([
-                    'cotizacion_id' => $idcotizacion,
-                    'descripcion' => $request->descripcion5,
-                    'cantidad' => $request->cantidad5,
-                    'subtotal' => $request->subtotal5,
-                ]);
-            }
-            if (isset($request->descripcion6)){
-
-                Linea_cotizacion::create([
-                    'cotizacion_id' => $idcotizacion,
-                    'descripcion' => $request->descripcion6,
-                    'cantidad' => $request->cantidad6,
-                    'subtotal' => $request->subtotal6,
-                ]);
-            }
-
 
             $lineas_cotizacion = Linea_cotizacion::where('cotizacion_id',$idcotizacion)->orderBy('id')->get();
             $cotizacion_total = Cotizacion::join('linea_cotizacion','cotizacion_id','=','cotizacion.id')->where('cotizacion_id',$idcotizacion)->select(DB::raw('SUM(cantidad*subtotal) as total'))->first();
@@ -128,8 +122,17 @@ class CotizacionController extends Controller
             $pdf = App::make('dompdf.wrapper');
             $content = $pdf->loadView('dinamica.ventas.cotizacion.pdf3', compact('cotizacion','lineas_cotizacion','cotizacion_total'))->output();
 
-            // $name = 'Cotización '.$cotizacion->numero.' obra '.$cotizacion->equipo->obra->nombre.' '.$cotizacion->resumen.'.pdf';
-            Cotizacion::setQuotation($content,$cotizacion->pdf);
+            Storage::disk('local')->put('cotizacion.pdf',$pdf->output());
+            $ruta_pdf = storage_path('app/cotizacion.pdf');
+
+            $pdfUrl = Cotizacion::setQuotation($ruta_pdf);
+
+            Storage::disk('local')->delete('app/cotizacion.pdf');
+
+            Cotizacion::findOrFail($idcotizacion)->update([
+                'pdf'=>$pdfUrl
+            ]);
+
 
         return redirect('ventas/cotizacion')->with('mensaje', 'Cotización creada con éxito');
     }
@@ -155,11 +158,15 @@ class CotizacionController extends Controller
     {
         can('editar-cotizaciones');
         $cotizacion = Cotizacion::findOrFail($id);
-        $descripciones = Linea_cotizacion::orderBy('id')->where('cotizacion_id', $id)->pluck('descripcion')->toArray();
-        $cantidades = Linea_cotizacion::orderBy('id')->where('cotizacion_id', $id)->pluck('cantidad')->toArray();
-        $subtotales = Linea_cotizacion::orderBy('id')->where('cotizacion_id', $id)->pluck('subtotal')->toArray();
+        $lineas_cotizacion = Linea_cotizacion::orderBy('id')->where('cotizacion_id', $id)->get();
         $equipos= Equipo::orderBy('id')->get();
-        return view('dinamica.ventas.cotizacion.editar', compact('cotizacion','descripciones', 'cantidades', 'subtotales', 'equipos'));
+
+        $total_coti = 0;
+        foreach ($lineas_cotizacion as $linea_cotizacion) {
+            $total_coti += $linea_cotizacion->cantidad*$linea_cotizacion->subtotal;
+        }
+
+        return view('dinamica.ventas.cotizacion.editar', compact('lineas_cotizacion','cotizacion', 'equipos', 'total_coti'));
     }
 
     /**
@@ -172,180 +179,27 @@ class CotizacionController extends Controller
     public function actualizar(Request $request, $id)
     {
         can('editar-cotizaciones');
-        $equipo = Equipo::with('obra')->findOrFail($request->equipo_id);
-        $name = Cotizacion::findOrFail($id)->pdf;
         Cotizacion::findOrFail($id)->update([
             'equipo_id' => $request->equipo_id,
             'numero' => $request->numero,
             'resumen' => $request->resumen,
             'fecha' => $request->fecha,
             'dirigido_a' => $request->dirigido_a,
-            'pdf' => Str::of('cotizacion_' . $request->numero . '_obra_' . $equipo->obra->nombre . '_' . $request->resumen)->slug('-'),
-
+            'observacion' => $request->observacion,
         ]);
-        $descripciones = Linea_cotizacion::orderBy('id')->where('cotizacion_id', $id)->pluck('descripcion')->toArray();
-        $subtotales = Linea_cotizacion::orderBy('id')->where('cotizacion_id', $id)->pluck('subtotal')->toArray();
-        $lineas_cotizacion = Linea_cotizacion::orderBy('id')->where('cotizacion_id', $id)->pluck('id')->toArray();
 
-        if (isset($descripciones[0])) {
-            if (isset($request->descripcion1)) {
-                Linea_cotizacion::findOrFail($lineas_cotizacion[0])->update([
-                    'cotizacion_id' => $id,
-                    'descripcion' => $request->descripcion1,
-                    'cantidad'=> $request->cantidad1,
-                    'subtotal' => $request->subtotal1,
-                ]);
-            } else {
-                Linea_cotizacion::destroy($lineas_cotizacion[0]);
-            }
+        $ids_lineas_cotizacion = Linea_cotizacion::orderBy('id')->where('cotizacion_id', $id)->pluck('id')->toArray();
 
-        } else {
-            if (isset($request->descripcion1)) {
-                Linea_cotizacion::create([
-                    'cotizacion_id' => $id,
-                    'descripcion' => $request->descripcion1,
-                    'cantidad'=> $request->cantidad1,
-                    'subtotal' => $request->subtotal1,
-                ]);
-            } else {
-                # code...
-            }
+        Linea_cotizacion::where('cotizacion_id',$id)->delete();
 
-        }
+        for ($i=0; $i < count($request->descripcion); $i++) {
 
-
-        if (isset($descripciones[1])) {
-            if (isset($request->descripcion2)) {
-                Linea_cotizacion::findOrFail($lineas_cotizacion[1])->update([
-                    'cotizacion_id' => $id,
-                    'descripcion' => $request->descripcion2,
-                    'cantidad'=> $request->cantidad2,
-                    'subtotal' => $request->subtotal2,
-                ]);
-            } else {
-                Linea_cotizacion::destroy($lineas_cotizacion[1]);
-            }
-
-        } else {
-            if (isset($request->descripcion2)) {
-                Linea_cotizacion::create([
-                    'cotizacion_id' => $id,
-                    'descripcion' => $request->descripcion2,
-                    'cantidad'=> $request->cantidad2,
-                    'subtotal' => $request->subtotal2,
-                ]);
-            } else {
-                # code...
-            }
-
-        }
-
-
-        if (isset($descripciones[2])) {
-            if (isset($request->descripcion3)) {
-                Linea_cotizacion::findOrFail($lineas_cotizacion[2])->update([
-                    'cotizacion_id' => $id,
-                    'descripcion' => $request->descripcion3,
-                    'cantidad'=> $request->cantidad3,
-                    'subtotal' => $request->subtotal3,
-                ]);
-            } else {
-                Linea_cotizacion::destroy($lineas_cotizacion[2]);
-            }
-
-        } else {
-            if (isset($request->descripcion3)) {
-                Linea_cotizacion::create([
-                    'cotizacion_id' => $id,
-                    'descripcion' => $request->descripcion3,
-                    'cantidad'=> $request->cantidad3,
-                    'subtotal' => $request->subtotal3,
-                ]);
-            } else {
-                # code...
-            }
-
-        }
-
-
-        if (isset($descripciones[3])) {
-            if (isset($request->descripcion4)) {
-                Linea_cotizacion::findOrFail($lineas_cotizacion[3])->update([
-                    'cotizacion_id' => $id,
-                    'descripcion' => $request->descripcion4,
-                    'cantidad'=> $request->cantidad4,
-                    'subtotal' => $request->subtotal4,
-                ]);
-            } else {
-                Linea_cotizacion::destroy($lineas_cotizacion[3]);
-            }
-
-        } else {
-            if (isset($request->descripcion4)) {
-                Linea_cotizacion::create([
-                    'cotizacion_id' => $id,
-                    'descripcion' => $request->descripcion4,
-                    'cantidad'=> $request->cantidad4,
-                    'subtotal' => $request->subtotal4,
-                ]);
-            } else {
-                # code...
-            }
-
-        }
-
-
-        if (isset($descripciones[4])) {
-            if (isset($request->descripcion5)) {
-                Linea_cotizacion::findOrFail($lineas_cotizacion[4])->update([
-                    'cotizacion_id' => $id,
-                    'descripcion' => $request->descripcion5,
-                    'cantidad'=> $request->cantidad5,
-                    'subtotal' => $request->subtotal5,
-                ]);
-            } else {
-                Linea_cotizacion::destroy($lineas_cotizacion[4]);
-            }
-
-        } else {
-            if (isset($request->descripcion5)) {
-                Linea_cotizacion::create([
-                    'cotizacion_id' => $id,
-                    'descripcion' => $request->descripcion5,
-                    'cantidad'=> $request->cantidad5,
-                    'subtotal' => $request->subtotal5,
-                ]);
-            } else {
-                # code...
-            }
-
-        }
-
-
-        if (isset($descripciones[5])) {
-            if (isset($request->descripcion6)) {
-                Linea_cotizacion::findOrFail($lineas_cotizacion[5])->update([
-                    'cotizacion_id' => $id,
-                    'descripcion' => $request->descripcion6,
-                    'cantidad'=> $request->cantidad6,
-                    'subtotal' => $request->subtotal6,
-                ]);
-            } else {
-                Linea_cotizacion::destroy($lineas_cotizacion[5]);
-            }
-
-        } else {
-            if (isset($request->descripcion6)) {
-                Linea_cotizacion::create([
-                    'cotizacion_id' => $id,
-                    'descripcion' => $request->descripcion6,
-                    'cantidad'=> $request->cantidad6,
-                    'subtotal' => $request->subtotal6,
-                ]);
-            } else {
-                # code...
-            }
-
+            Linea_cotizacion::create([
+                'cotizacion_id' => $id,
+                'descripcion' => $request->descripcion[$i],
+                'cantidad' => $request->cantidad[$i],
+                'subtotal' => $request->subtotal[$i],
+            ]);
         }
 
         $lineas_cotizacion = Linea_cotizacion::where('cotizacion_id',$id)->orderBy('id')->get();
@@ -355,7 +209,20 @@ class CotizacionController extends Controller
         $pdf = App::make('dompdf.wrapper');
         $content = $pdf->loadView('dinamica.ventas.cotizacion.pdf3', compact('cotizacion','lineas_cotizacion','cotizacion_total'))->output();
 
-        Cotizacion::setQuotation($content,$cotizacion->pdf, $name);
+        Storage::disk('local')->put('cotizacion.pdf',$pdf->output());
+        $ruta_pdf = storage_path('app/cotizacion.pdf');
+
+        $publicId = getPublicIdByUrl($cotizacion->pdf);
+
+        $pdfUrl = Cotizacion::setQuotation($ruta_pdf,$publicId);
+
+        Storage::disk('local')->delete('app/cotizacion.pdf');
+
+        Cotizacion::findOrFail($id)->update([
+            'pdf'=>$pdfUrl
+        ]);
+
+        return dd($publicId);
 
         return redirect('ventas/cotizacion')->with('mensaje', 'Cotización actualizada con éxito');
 
@@ -371,10 +238,11 @@ class CotizacionController extends Controller
     {
         can('eliminar-cotizaciones');
         if ($request->ajax()) {
-            $name = Cotizacion::findOrFail($id)->pdf;
+            $url = Cotizacion::findOrFail($id)->pdf;
+            $publicId = getPublicIdByUrl($url);
             if (Linea_cotizacion::where('cotizacion_id',$id)->delete()) {
                 if (Cotizacion::destroy($id)) {
-                    Storage::disk('cloudinary')->delete("files/quotation/$name");
+                    cloudinary()->destroy($publicId);
                     return response()->json(['mensaje' => 'ok']);
                 }
 

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 class Cotizacion extends Model
 {
     protected $table="cotizacion";
-    protected $fillable = ['equipo_id', 'numero', 'resumen', 'fecha', 'dirigido_a', 'pdf'];
+    protected $fillable = ['equipo_id', 'numero', 'resumen', 'fecha', 'dirigido_a', 'pdf', 'observacion'];
     protected $guarded = ['id'];
 
     public function lineas_cotizacion()
@@ -23,13 +23,16 @@ class Cotizacion extends Model
         return $this->belongsTo(Equipo::class, 'equipo_id');
     }
 
-    public static function setQuotation($pdf, $name, $actual = false){
+    public static function setQuotation($ruta_pdf, $actual=false){
         // return var_dump($pdf);
-        if ($pdf) {
+        if ($ruta_pdf) {
             if ($actual) {
-                Storage::disk('cloudinary')->delete("files/quotation/$name");
+                cloudinary()->destroy($actual);
             }
-            Storage::disk('cloudinary')->put("files/quotation/$name", $pdf);
+            $result = cloudinary()->upload($ruta_pdf,[
+                "folder"=>"files/quotation/",
+            ])->getSecurePath();
+            return $result;
         } else {
             return false;
         }
