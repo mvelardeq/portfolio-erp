@@ -222,8 +222,6 @@ class CotizacionController extends Controller
             'pdf'=>$pdfUrl
         ]);
 
-        return dd($publicId);
-
         return redirect('ventas/cotizacion')->with('mensaje', 'Cotización actualizada con éxito');
 
     }
