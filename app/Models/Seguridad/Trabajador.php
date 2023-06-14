@@ -101,31 +101,20 @@ class Trabajador extends Authenticatable
         if ($foto) {
             if ($actual) {
                 cloudinary()->destroy($actual);
-                // Storage::disk('s3')->delete("photos/profilePhoto/$actual");
             }
-            /* $imageName = Str::random(14) . '.jpg';
-            $imagen = Image::make($foto)->encode('jpg', 75);
-            $imagen->resize(600, 800, function ($constraint) {
-                $constraint->upsize();
-            });
-            dd($imagen->stream()); */
             $result = cloudinary()->upload(
                 $foto->getRealPath(),
                 [
                     'transformation' => [
                         'gravity' => 'auto',
-                        'width' => 800,
-                        'height' => 800,
+                        'width' => 400,
+                        'height' => 400,
                         'crop' => 'crop',
                     ],
                     'folder' => 'photos/profilePhoto/'
                 ]
             )->getSecurePath();
-            // $result = $imagen->stream()->storeOnCloudinary('photos/profilePhoto/');
-            // Storage::disk('s3')->put("photos/profilePhoto/$imageName", $imagen->stream());
-            // dd(cloudinary()->getPublicId());
-            return cloudinary()->getPublicId();
-            // return $imageName;
+            return $result;
         } else {
             return false;
         }

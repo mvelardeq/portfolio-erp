@@ -97,7 +97,8 @@ use Carbon\Carbon;
                                             {{ $event['observacion'] }}
                                             <div>
                                                 <img class="img-fluid pad mx-auto d-block pb-2"
-                                                    src="{{ cloudinary()->getUrl($event['foto']) }}" alt="...">
+                                                    {{-- src="{{ cloudinary()->getUrl($event['foto']) }}" alt="..."> --}}
+                                                    src="{{ $event['foto'] }}" alt="...">
                                             </div>
                                         </div>
                                     </div>

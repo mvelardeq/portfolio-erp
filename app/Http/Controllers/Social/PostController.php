@@ -97,7 +97,12 @@ class PostController extends Controller
         can('eliminar-posts');
         if ($request->ajax()) {
             $post = Post::findOrFail($id);
-            Storage::disk('s3')->delete("photos/postPhoto/$post->foto");
+            // return dd($post);
+            if(isset($post->foto)){
+                $publicId = getPublicIdByUrl($post->foto);
+                // Storage::disk('s3')->delete("photos/postPhoto/$post->foto");
+                cloudinary()->destroy($publicId);
+            }
             $post->delete();
             return response()->json(['mensaje'=>'ok']);
         } else {

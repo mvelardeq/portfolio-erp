@@ -21,12 +21,12 @@ class CrearTablaTrabajador extends Migration
             $table->string('segundo_nombre', 50)->nullable();
             $table->string('primer_apellido', 50);
             $table->string('segundo_apellido', 50);
-            $table->string('correo',160)->unique();
+            $table->string('correo',300)->unique();
             $table->string('dni', 10);
             $table->string('direccion', 300)->nullable();
             $table->string('celular', 9)->nullable();
             $table->date('fecha_nacimiento', 12)->nullable();
-            $table->string('foto', 120)->nullable();
+            $table->string('foto', 200)->nullable();
             $table->string('botas', 5)->nullable();
             $table->string('overol', 5)->nullable();
             $table->string('supervisor_id', 15)->nullable();

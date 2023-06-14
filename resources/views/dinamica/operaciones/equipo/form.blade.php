@@ -83,6 +83,6 @@
 <div class="form-group row">
     <label for="plano" class="col-lg-3 control-form-label">Plano</label>
     <div class="col-lg-8">
-        <input type="file" name="plano_up" id="plano" data-initial-preview="{{isset($equipo->plano) ? Storage::disk('s3')->url("files/planes/$equipo->plano") : "http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=Plano"}}" accept="application/pdf"/>
+        <input type="file" name="plano_up" id="plano" data-initial-preview="{{isset($equipo->plano) ? $equipo->plano : "http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=Plano"}}" accept="application/pdf"/>
     </div>
 </div>

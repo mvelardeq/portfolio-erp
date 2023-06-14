@@ -47,7 +47,7 @@ class NotificacionesController extends Controller
         $fotos = $ot->fotos;
         $linksfotos = collect();
         foreach ($fotos as $foto) {
-            $linksfotos->push(Storage::disk('cloudinary')->url($foto->foto));
+            $linksfotos->push($foto->foto);
         }
         return response()->json($linksfotos);
     }
@@ -232,7 +232,17 @@ class NotificacionesController extends Controller
     public function eliminar(Request $request, $id)
     {
         if ($request->ajax()) {
+
+            $ot = Ot::findOrFail($id);
+            $otFotos = $ot->fotos;
+
             if (Ot::destroy($id)) {
+
+                foreach ($otFotos as $otFoto) {
+                    $publicId = getPublicIdByUrl($otFoto->foto);
+                    cloudinary()->destroy($publicId);
+                }
+
                 return response()->json(['mensaje' => 'ok']);
             } else {
                 return response()->json(['mensaje' => 'ng']);

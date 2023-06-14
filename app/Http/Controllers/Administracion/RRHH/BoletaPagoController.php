@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class BoletaPagoController extends Controller
 {
@@ -105,6 +106,8 @@ class BoletaPagoController extends Controller
             $indice++;
         }
 
+        $sueldo=0;
+
         foreach ($periodos_ascensos as $periodo_ascenso) {
 
                 if ($periodo_ascenso['inicio_periodo'] && $inicio<=$periodo_ascenso['inicio'] && $fin>=$periodo_ascenso['inicio']) {
@@ -132,6 +135,8 @@ class BoletaPagoController extends Controller
 
         $ots_horas = Ot::with('actividades')->where('trabajador_id',$idTrabajador)->where('fecha','<=',$fin)->where('fecha','>=',$inicio)->join('ot_actividad', 'ot.id','=','ot_actividad.ot_id')->select(DB::raw('SUM(horas) as horas_totales'),'fecha')->groupBy('fecha')->get();
          // Calculos de domingos considerados
+         $inicio_ots=0;
+         $fin_ots=0;
         for ($i=1; $i <=15 ; $i++) {
             if($ots_horas->where('fecha',Carbon::create($year,$month,$i)->isoFormat('YYYY-MM-DD'))->count()>0){
                 $inicio_ots =$i;
@@ -161,6 +166,8 @@ class BoletaPagoController extends Controller
 
         $ots_horas = Ot::with('actividades')->where('trabajador_id',$idTrabajador)->where('fecha','<=',$fin)->where('fecha','>=',$inicio)->join('ot_actividad', 'ot.id','=','ot_actividad.ot_id')->select(DB::raw('SUM(horas) as horas_totales'),'fecha')->groupBy('fecha')->get();
          // Calculos de domingos considerados
+         $inicio_ots=0;
+         $fin_ots=0;
         for ($i=1; $i <=30 ; $i++) {
             if($ots_horas->where('fecha',Carbon::create($year,$month,$i)->isoFormat('YYYY-MM-DD'))->count()>0){
                 $inicio_ots =$i;
@@ -354,6 +361,7 @@ class BoletaPagoController extends Controller
             if (!$tecnico) {
                 $pdf = App::make('dompdf.wrapper');
                 $content = $pdf->loadView('dinamica.administracion.rrhh.boleta-pago.boletaNoTecnicoPdf', compact('tecnico','trabajador','costo_hora','periodo','pago_quincena','request'))->output();
+
                 BoletaPago::setBoleta($content,'Boleta_'.Carbon::create($periodo)->isoFormat('MMMM_YYYY').'_'.$trabajador->primer_nombre.'_'.$trabajador->primer_apellido.'.pdf');
                 // return view('dinamica.administracion.rrhh.boleta-pago.crearboleta',compact('tecnico','trabajador','costo_hora','periodo','pago_quincena'));
             }elseif (!$hasOts) {

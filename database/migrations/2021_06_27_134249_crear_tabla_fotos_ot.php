@@ -17,7 +17,7 @@ class CrearTablaFotosOt extends Migration
             $table->id();
             $table->unsignedBigInteger('ot_id');
             $table->foreign('ot_id', 'fk_foto_ot')->references('id')->on('ot')->onDelete('cascade')->onUpdate('restrict');
-            $table->string('foto', 120);
+            $table->string('foto', 200);
             $table->timestamps();
         });
     }

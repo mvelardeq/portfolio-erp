@@ -33,7 +33,7 @@ class Fotos_ot extends Model
                     'folder' => 'photos/otPhoto/'
                 ]
             )->getSecurePath();
-            return cloudinary()->getPublicId();
+            return $result;
         } else {
             return false;
         }

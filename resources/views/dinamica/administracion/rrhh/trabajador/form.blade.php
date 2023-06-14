@@ -130,7 +130,8 @@
     <label for="foto" class="col-lg-3 control-form-label">Foto</label>
     <div class="col-lg-8">
         <input type="file" name="foto_up" id="foto"
-            data-initial-preview="{{ isset($data->foto) ? cloudinary()->getUrl($data->foto) : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=Caratula+Libro' }}"
+            {{-- data-initial-preview="{{ isset($data->foto) ? cloudinary()->getUrl($data->foto) : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=Caratula+Libro' }}" --}}
+            data-initial-preview="{{ isset($data->foto) ? $data->foto : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=Caratula+Libro' }}"
             accept="image/*" />
     </div>
 </div>

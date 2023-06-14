@@ -57,6 +57,6 @@
     <label for="" class="col-lg-3 control-form-label">Foto</label>
     <div class="col-lg-8">
         {{-- <input type="file" name="foto_up" id="foto" data-initial-preview="{{isset($data->imagen) ? Storage::url("imagenes/caratulas/$data->imagen") : "http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=Caratula+Libro"}}" accept="image/*"/> --}}
-        <input type="file" name="foto_producto" id="foto" data-initial-preview="{{isset($producto->foto) ? Storage::disk('s3')->url("photos/product/$producto->foto") : "http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=Foto+Producto"}}" accept="image/*"/>
+        <input type="file" name="foto_producto" id="foto" data-initial-preview="{{isset($producto->foto) ? $producto->foto : "http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=Foto+Producto"}}" accept="image/*"/>
     </div>
 </div>

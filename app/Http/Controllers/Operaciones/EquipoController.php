@@ -94,9 +94,9 @@ class EquipoController extends Controller
     public function actualizar(ValidacionEquipo $request, $id)
     {
         can('editar-equipos');
-        // Equipo::findOrFail($id)->update($request->all());
         $equipo = Equipo::findOrFail($id);
-        if ($plane = Equipo::setPlane($request->plano_up, $equipo->plano))
+        $publicId = getPublicIdByUrl($equipo->plano);
+        if ($plane = Equipo::setPlane($request->plano_up, $publicId))
             $request->request->add(['plano' => $plane]);
         $equipo->update(array_filter($request->all()));
         return redirect('operaciones/equipo')->with('mensaje', 'Equipo actualizado con éxito');
@@ -114,9 +114,11 @@ class EquipoController extends Controller
     {
         can('eliminar-equipos');
         $equipo = Equipo::findorFail($id);
+        $publicId = getPublicIdByUrl($equipo->plano);
         if ($request->ajax()) {
             if (Equipo::destroy($id)) {
-                Storage::disk('s3')->delete("files/planes/$equipo->plano");
+                // Storage::disk('s3')->delete("files/planes/$equipo->plano");
+                cloudinary()->destroy($publicId);
                 return response()->json(['mensaje' => 'ok']);
             } else {
                 return response()->json(['mensaje' => 'ng']);
@@ -132,7 +134,8 @@ class EquipoController extends Controller
     {
         // $plano = $_POST['plano'];
         $equipo = Equipo::findOrFail($id);
-        $plane = Equipo::setPlane($request->planoModal, $equipo->plano);
+        $publicId = getPublicIdByUrl($equipo->plano);
+        $plane = Equipo::setPlane($request->planoModal, $publicId);
         Equipo::findOrFail($id)->update(['plano'=>$plane]);
 
         // return dd($request->planoModal);

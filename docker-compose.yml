@@ -33,6 +33,8 @@ services:
     # (this is just an example, not intended to be a production configuration)
     command: --default-authentication-plugin=mysql_native_password
     restart: always
+    volumes:
+      - ./db-mysql:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: Martin2322
   phpmyadmin:

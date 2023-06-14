@@ -143,7 +143,7 @@ Ot
                     <div class="modal-body">
                         <h6 id="data-obra"></h6>
                         <div class="modal-body-fotos"></div>
-                        {{-- <img class="imagenmodal img-fluid" src="" alt=""> --}}
+                        <img class="imagenmodal img-fluid" src="" alt="">
                     </div>
                 </div>
             </div>

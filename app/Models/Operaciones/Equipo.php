@@ -23,11 +23,21 @@ class Equipo extends Model
     public static function setPlane($plane, $actual = false){
         if ($plane) {
             if ($actual) {
-                Storage::disk('s3')->delete("files/planes/$actual");
+                cloudinary()->destroy($actual);
             }
-            $planeName = Str::random(14) .'.pdf';
-            Storage::disk('s3')->put("files/planes/$planeName", file_get_contents($plane));
-            return $planeName;
+            $result = cloudinary()->upload(
+                $plane->getRealPath(),
+                [
+                    'transformation' => [
+                        'gravity' => 'auto',
+                        'width' => 800,
+                        'height' => 800,
+                        'crop' => 'crop',
+                    ],
+                    'folder' => 'files/planes/'
+                ]
+            )->getSecurePath();
+            return $result;
         } else {
             return false;
         }

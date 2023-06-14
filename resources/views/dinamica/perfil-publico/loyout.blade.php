@@ -28,7 +28,8 @@ use Carbon\Carbon;
             <div class="card-body box-profile">
               <div class="text-center">
                 <img class="profile-user-img img-fluid img-circle"
-                     src="{{ cloudinary()->getUrl($data->foto) }}"
+                     {{-- src="{{ cloudinary()->getUrl($data->foto) }}" --}}
+                     src="{{ $data->foto }}"
                      alt="User profile picture">
               </div>
               {{-- {{dd($ascensos->last()->cargo)}} --}}

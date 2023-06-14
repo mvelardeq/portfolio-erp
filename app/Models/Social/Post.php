@@ -49,7 +49,7 @@ class Post extends Model
                     'folder' => 'photos/postPhoto/'
                 ]
             )->getSecurePath();
-            return cloudinary()->getPublicId();
+            return $result;
         } else {
             return false;
         }

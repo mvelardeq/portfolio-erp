@@ -62,7 +62,8 @@
                                     <td>{{ $producto->unidades }}</td>
                                     <td>
                                         <img class="profile-user-img imagenproducto"
-                                            src="{{ cloudinary()->getUrl($producto->foto) }}" alt="Foto del producto"
+                                            {{-- src="{{ cloudinary()->getUrl($producto->foto) }}" alt="Foto del producto" --}}
+                                            src="{{ $producto->foto }}" alt="Foto del producto"
                                             type="button">
                                         {{-- <img class="profile-user-img imagenproducto"
                                     src="{{Storage::disk('s3')->url("photos/product/".$producto->foto."")}}"

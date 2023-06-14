@@ -54,7 +54,8 @@
 <div class="form-group row">
     <label for="" class="col-lg-3 control-form-label requerido">Foto</label>
     <div class="col-lg-8">
-        <input type="file" name="foto_producto" id="foto" value="{{ old('foto_producto', $producto->foto ?? '') }}" data-initial-preview="{{ isset($producto->foto) ? cloudinary()->getUrl($producto->foto) : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=Foto+Producto' }}"
+        {{-- <input type="file" name="foto_producto" id="foto" value="{{ old('foto_producto', $producto->foto ?? '') }}" data-initial-preview="{{ isset($producto->foto) ? cloudinary()->getUrl($producto->foto) : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=Foto+Producto' }}" --}}
+        <input type="file" name="foto_producto" id="foto" value="{{ old('foto_producto', $producto->foto ?? '') }}" data-initial-preview="{{ isset($producto->foto) ? $producto->foto : 'http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=Foto+Producto' }}"
             accept="image/*" />
     </div>
 </div>

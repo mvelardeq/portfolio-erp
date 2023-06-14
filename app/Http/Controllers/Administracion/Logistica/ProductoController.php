@@ -94,7 +94,8 @@ class ProductoController extends Controller
     {
         can('editar-productos');
         $producto = Producto::findOrFail($id);
-        if ($foto = Producto::setFoto($request->foto_producto,$producto->foto))
+        $publicId = getPublicIdByUrl($producto->foto);
+        if ($foto = Producto::setFoto($request->foto_producto,$publicId))
             $request->request->add(['foto' => $foto]);
         $producto->update($request->all());
         return redirect('administracion/logistica/producto')->with('mensaje','producto actualizado con éxito');
@@ -110,10 +111,11 @@ class ProductoController extends Controller
     {
         can('eliminar-productos');
         if ($request->ajax()) {
-            $foto = Producto::findOrFail($id)->foto;
+            $url = Producto::findOrFail($id)->foto;
+            $publicId = getPublicIdByUrl($url);
             if(Producto::destroy($id)){
                 // Storage::disk('cloudinary')->delete("photos/product/$foto.jpg");
-                cloudinary()->destroy($foto);
+                cloudinary()->destroy($publicId);
                 return response()->json(['mensaje'=>'ok']);
             }
         } else {

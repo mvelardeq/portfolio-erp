@@ -95,7 +95,8 @@ class UsuarioController extends Controller
     {
         return $request;
         $trabajador = Trabajador::findOrFail($id);
-        if ($foto = Trabajador::setFoto($request->foto_up, $trabajador->foto))
+        $publicId = getPublicIdByUrl($trabajador);
+        if ($foto = Trabajador::setFoto($request->foto_up, $publicId))
             $request->request->add(['foto' => $foto]);
         if ($request->password == '' && $request->re_password == '') {
             return dd('hola');

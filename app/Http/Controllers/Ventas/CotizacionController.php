@@ -47,15 +47,15 @@ class CotizacionController extends Controller
     public function automatizar()
     {
 
-        set_time_limit(900);
+        set_time_limit(2000);
 
         $cotizaciones= Cotizacion::with('lineas_cotizacion')->orderBy('id')->get();
 
         foreach ($cotizaciones as $cotizacion) {
 
-            if($cotizacion->id<=890){
-                continue;
-            }
+            // if($cotizacion->id>=891 || $cotizacion->id<=866){
+            //     continue;
+            // }
 
             $lineas_cotizacion = Linea_cotizacion::where('cotizacion_id',$cotizacion->id)->orderBy('id')->get();
             $cotizacion_total = Cotizacion::join('linea_cotizacion','cotizacion_id','=','cotizacion.id')->where('cotizacion_id',$cotizacion->id)->select(DB::raw('SUM(cantidad*subtotal) as total'))->first();

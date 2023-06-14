@@ -55,7 +55,7 @@ Equipos
                             <td>{{$equipo->cuarto_maquina}}</td>
                             <td id="plano{{$equipo->id}}">
                                 @if (isset($equipo->plano))
-                                    <a href="{{Storage::disk('s3')->url('files/planes/'.$equipo->plano)}}" target="_blank"><i class="fas fa-file-pdf text-danger"></i></a>
+                                    <a href="{{ $equipo->plano }}" target="_blank"><i class="fas fa-file-pdf text-danger"></i></a>
                                 @else
                                     <form class="d-inline subir-plano" data-id="{{$equipo->id}}">
                                         @csrf
@@ -104,7 +104,7 @@ Equipos
                             <div class="form-group row">
                                 <label for="planoModal" class="col-lg-3 col-form-label">Seleccionar archivo</label>
                                 <div class="col-lg-8">
-                                    <input type="file" name="planoModal" id="planoModal" data-initial-preview="{{isset($equipo->plano) ? Storage::disk('s3')->url("files/planes/$equipo->plano") : "http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=Plano"}}" accept="application/pdf"/>
+                                    <input type="file" name="planoModal" id="planoModal" data-initial-preview="{{isset($equipo->plano) ? $equipo->plano : "http://www.placehold.it/200x150/EFEFEF/AAAAAA&text=Plano"}}" accept="application/pdf"/>
                                 </div>
                             </div>
                         </div>

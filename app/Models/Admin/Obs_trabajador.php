@@ -37,7 +37,7 @@ class Obs_trabajador extends Model
                     'folder' => 'photos/ObsPhoto/'
                 ]
             )->getSecurePath();
-            return cloudinary()->getPublicId();
+            return $result;
         } else {
             return false;
         }

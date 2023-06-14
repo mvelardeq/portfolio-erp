@@ -42,7 +42,7 @@ class Producto extends Model
                     'folder' => 'photos/product/'
                 ]
             )->getSecurePath();
-            return cloudinary()->getPublicId();
+            return $result;
         } else {
             return false;
         }

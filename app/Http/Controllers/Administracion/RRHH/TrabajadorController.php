@@ -92,7 +92,8 @@ class TrabajadorController extends Controller
     {
         can('editar-trabajadores');
         $trabajador = Trabajador::findOrFail($id);
-        if ($foto = Trabajador::setFoto($request->foto_up, $trabajador->foto))
+        $publicId = getPublicIdByUrl($trabajador->foto);
+        if ($foto = Trabajador::setFoto($request->foto_up, $publicId))
             $request->request->add(['foto' => $foto]);
         if($request->password==null && $request->re_password==null){
             $trabajador->update(Arr::except($request->all(),['password']));
@@ -114,9 +115,11 @@ class TrabajadorController extends Controller
         can('eliminar-trabajadores');
         if ($request->ajax()) {
             $trabajador=Trabajador::findOrFail($id);
+            $publicId = getPublicIdByUrl($trabajador->foto);
             $trabajador->roles()->detach();
             $trabajador->delete();
-            Storage::disk('s3')->delete("photos/profilePhoto/$trabajador->foto");
+            // Storage::disk('s3')->delete("photos/profilePhoto/$trabajador->foto");
+            cloudinary()->destroy($publicId);
             return response()->json(['mensaje'=>'ok']);
         } else {
             abort(404);
